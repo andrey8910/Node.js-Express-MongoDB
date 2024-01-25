@@ -2,9 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import multer from 'multer'; //for upload file
 import {loginValidation, registerValidation, postCreateValidation} from "./validations.js";
-import checkAuth from './utils/checkAuth.js'
-import * as UserController from "./controllers/UserController.js";
-import * as PostController from "./controllers/PostController.js"
+import {checkAuth, handleValidationErrors} from './utils/index.js'
+import {UserController, PostController} from "./controllers/index.js";
+
 
 //connect DB
 mongoose
@@ -32,8 +32,8 @@ const upload = multer({storage: fileStorage});
 //routes
 
 app.get('/auth/me', checkAuth, UserController.getMe);
-app.post('/auth/login', loginValidation, UserController.login);
-app.post('/auth/register', registerValidation, UserController.register);
+app.post('/auth/login', loginValidation, handleValidationErrors, UserController.login);
+app.post('/auth/register', registerValidation, handleValidationErrors, UserController.register);
 
 app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
     try {
@@ -46,7 +46,7 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
 
 })
 
-app.post('/posts', checkAuth, postCreateValidation, PostController.create);
+app.post('/posts', checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
 app.get('/posts', PostController.getAll);
 app.get('/posts/:id', PostController.getOne);
 app.delete('/posts/:id', checkAuth, PostController.remove);
